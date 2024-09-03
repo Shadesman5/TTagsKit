@@ -1,0 +1,100 @@
+#slides {
+    position: relative;
+}
+#slides .slides-container {
+    display: none;
+}
+#slides .scrollable {
+    *zoom: 1;
+    position: relative;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+}
+#slides .scrollable:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.slides-navigation {
+    margin: 0 auto;
+    position: absolute;
+    z-index: 3;
+    top: 46%;
+    width: 100%;
+}
+.slides-navigation a {
+    position: absolute;
+    display: block;
+}
+.slides-navigation a.prev {
+    left: 0;
+}
+.slides-navigation a.next {
+    right: 0;
+}
+
+.slides-pagination {
+    position: absolute;
+    z-index: 3;
+    bottom: 0;
+    text-align: center;
+    width: 100%;
+}
+.slides-pagination a {
+    border: 2px solid #222;
+    border-radius: 15px;
+    width: 10px;
+    height: 10px;
+    display: -moz-inline-stack;
+    display: inline-block;
+    vertical-align: middle;
+    *vertical-align: auto;
+    zoom: 1;
+    *display: inline;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGP6zwAAAgcBApocMXEAAAAASUVORK5CYII=");
+    margin: 2px;
+    overflow: hidden;
+    text-indent: -100%;
+}
+.slides-pagination a.current {
+    background: #222;
+}
+
+.slides-container .text-overlay{
+    position: relative;
+    height: 100%;
+}
+
+.slides-pagination > a.current{
+    background-color: #fff;
+}
+.slides-pagination > a{
+    border: 2px solid #fff;
+}
+
+
+.slides-container .text-overlay .text, .slides-container .text-overlay .header{
+    color: #fff;
+    position: absolute;
+    left: 50%;
+    margin-right: -50%;
+    padding: 5px 10px;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0,0,0,.25);
+}
+.slides-container .text-overlay .header{
+    top: calc(50% - 30px);
+    line-height: 60px;
+    font-size: 60px;
+    border: 3px solid #fff;
+}
+.slides-container .text-overlay .text{
+    font-size: 20px;
+    top: calc(50% + 80px);
+    border: 2px solid #fff;
+    max-width: 90%;
+}

@@ -1,0 +1,56 @@
+{
+    "name": "pagekit/pagekit",
+    "type": "project",
+    "description": "The TTAGS CMS",
+    "keywords": ["cms", "pagekit"],
+    "homepage": "http://pagekit.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pagekit Team",
+            "email": "info@pagekit.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2",
+        "composer/composer": "~1.9.1",
+        "doctrine/annotations": "~1.8.0",
+        "doctrine/dbal": "~2.10.0",
+        "paragonie/random-lib": "~2.0.0",
+        "maximebf/debugbar": "~1.15",
+        "monolog/monolog": "~1.25",
+        "nikic/php-parser": "~4.3.0",
+        "psr/log": "~1.1.2",
+        "swiftmailer/swiftmailer": "~6.2.3",
+        "symfony/debug": "~4.3",
+        "symfony/finder": "~4.3",
+        "symfony/http-foundation": "~4.3",
+        "symfony/routing": "~4.3",
+        "symfony/stopwatch": "~4.3",
+        "symfony/templating": "~4.3",
+        "symfony/translation": "~4.3",
+        "twig/twig": "^2.12.2"
+    },
+    "require-dev": {
+        "ext-dom": "*",
+        "ext-json": "*",
+        "ext-libxml": "*",
+        "ext-mbstring": "*",
+        "ext-xml": "*",
+        "ext-xmlwriter": "*",
+        "phpunit/phpunit": "~8.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pagekit\\": "app/modules/application/src",
+            "Pagekit\\Installer\\": "app/installer/src",
+            "Pagekit\\System\\": "app/system/src",
+            "Pagekit\\Config\\": "app/modules/config/src",
+            "Pagekit\\Console\\": "app/console/src",
+            "Pagekit\\Migration\\": "app/modules/migration/src"
+        }
+    },
+    "config": {
+        "vendor-dir": "app/vendor"
+    }
+}

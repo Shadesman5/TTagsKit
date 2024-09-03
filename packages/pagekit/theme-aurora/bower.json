@@ -1,0 +1,7 @@
+{
+  "name": "theme-aurora",
+  "dependencies": {
+    "uikit": "#master"
+  },
+  "private": true
+}

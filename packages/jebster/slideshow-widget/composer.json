@@ -1,0 +1,15 @@
+{
+  "name": "jebster/slideshow-widget",
+  "version": "0.1.2",
+  "type": "pagekit-extension",
+  "title": "Slideshow",
+  "description": "Add a slideshow to any position.",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jebster",
+      "email": "pagekit@jebster.net",
+      "homepage": "http://jebster.net"
+    }
+  ]
+}

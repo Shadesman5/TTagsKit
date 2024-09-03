@@ -1,0 +1,22 @@
+{
+    "name": "pagekit/theme-aurora",
+    "type": "pagekit-theme",
+    "version": "1.0.0",
+    "title": "Aurora",
+    "description": "With its large image sidebar the Aurora theme is great for portfolios and blogging. It includes 6 totally different styles.",
+    "license": "MIT",
+    "copyright": "(c) 2016 Pagekit",
+    "authors": [
+        {
+            "name": "Pagekit",
+            "email": "info@pagekit.com",
+            "homepage": "http://pagekit.com"
+        }
+    ],
+    "extra": {
+        "image": "image.jpg"
+    },
+    "archive": {
+        "exclude": ["!/app", "!/css", "/app/assets"]
+    }
+}

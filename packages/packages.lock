@@ -1,0 +1,201 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "3930896afa4a4479981f91b8de9b03bc",
+    "content-hash": "bbbb09a31fa6119bb28fa8329529c895",
+    "packages": [
+        {
+            "name": "pagekit/blog",
+            "version": "1.0.7",
+            "dist": {
+                "type": "zip",
+                "url": "https://pagekit.com/package/pagekit/blog/1.0.7.zip",
+                "reference": null,
+                "shasum": "690786ff41645c25d7c180a3781ddc51205bb0ad"
+            },
+            "archive": {
+                "exclude": [
+                    "node_modules",
+                    "!/app"
+                ]
+            },
+            "type": "pagekit-extension",
+            "extra": {
+                "icon": "icon.svg",
+                "scripts": "scripts.php"
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Pagekit",
+                    "email": "info@pagekit.com",
+                    "homepage": "http://pagekit.com"
+                }
+            ],
+            "description": "A blog extensions with a built-in comment system."
+        },
+        {
+            "name": "driven/listings",
+            "version": "1.0.6",
+            "dist": {
+                "type": "zip",
+                "url": "https://pagekit.com/package/driven/listings/1.0.6.zip",
+                "reference": null,
+                "shasum": "390d7c073057391662981bec3c737a860fec1484"
+            },
+            "archive": {
+                "exclude": [
+                    "node_modules"
+                ]
+            },
+            "type": "pagekit-extension",
+            "extra": {
+                "scripts": "scripts.php",
+                "icon": "icon.svg"
+            },
+            "authors": [
+                {
+                    "name": "driven.",
+                    "email": "contact@driven.network",
+                    "homepage": "https://driven.network"
+                }
+            ],
+            "description": "Listings provides a clean way to create manageable content for your site. Create any type of listed content like professional portfolios, products showcase, events, restaurant menus and more.\r\nQuickly build your list by using the built-in Default Template which can be easily configured to showcase your content as you want or create custom templates for your content."
+        },
+        {
+            "name": "pagekit/theme-aurora",
+            "version": "1.0.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://pagekit.com/package/pagekit/theme-aurora/1.0.0.zip",
+                "reference": null,
+                "shasum": "d05b5e8096a4d7e33942124292f652b6a761c207"
+            },
+            "archive": {
+                "exclude": [
+                    "!/app",
+                    "!/css",
+                    "/app/assets"
+                ]
+            },
+            "type": "pagekit-theme",
+            "extra": {
+                "image": "image.jpg"
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Pagekit",
+                    "email": "info@pagekit.com",
+                    "homepage": "http://pagekit.com"
+                }
+            ],
+            "description": "With its large image sidebar the Aurora theme is great for portfolios and blogging. It includes 6 totally different styles."
+        },
+        {
+            "name": "pagekit/theme-one",
+            "version": "1.0.1",
+            "dist": {
+                "type": "zip",
+                "url": "https://pagekit.com/package/pagekit/theme-one/1.0.1.zip",
+                "reference": null,
+                "shasum": "2acaae7558661bdf71b7cea03055069d02e8d47c"
+            },
+            "archive": {
+                "exclude": [
+                    "!/app",
+                    "!/css",
+                    "/app/assets"
+                ]
+            },
+            "type": "pagekit-theme",
+            "extra": {
+                "image": "image.jpg"
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Pagekit",
+                    "email": "info@pagekit.com",
+                    "homepage": "http://pagekit.com"
+                }
+            ],
+            "description": "Pagekit's default theme."
+        },
+        
+        {
+            "name": "spqr/cookiewarning",
+            "version": "1.0.4",
+            "dist": {
+                "type": "zip",
+                "url": "https://pagekit.com/package/spqr/cookiewarning/1.0.4.zip",
+                "reference": null,
+                "shasum": "28b899fd3f228a6bf2e0850024f33704a6c66c16"
+            },
+            "type": "pagekit-extension",
+            "extra": {
+                "icon": "icon.svg",
+                "scripts": "scripts.php"
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Roman Lossin-Beßler",
+                    "homepage": "https://spqr.wtf"
+                }
+            ],
+            "description": "Displays a Cookie-warning"
+        },
+        {
+            "name": "tomekknapczyk/sitemap",
+            "version": "1.0.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://pagekit.com/package/tomekknapczyk/sitemap/1.0.0.zip",
+                "reference": null,
+                "shasum": "cdb4a54c73f60a0987f07461e20645451080248a"
+            },
+            "archive": {
+                "exclude": [
+                    "node_modules",
+                    "!/app"
+                ]
+            },
+            "type": "pagekit-extension",
+            "extra": {
+                "icon": "icon.svg",
+                "scripts": "scripts.php"
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tomek Knapczyk",
+                    "email": "tomekknapczyk@gmail.com",
+                    "homepage": "http://programista.io"
+                }
+            ],
+            "description": "Sitemap generator"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

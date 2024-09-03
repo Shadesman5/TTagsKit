@@ -1,0 +1,8 @@
+!/app/assets/codemirror
+!/app/assets/marked
+/config.php
+/TTagsKit*.zip
+/TTagsKit.db
+node_modules
+.DS_Store
+.idea
