@@ -8,13 +8,70 @@ return [
     'install' => function ($app) {
 
         $util = $app['db']->getUtility();
+        $manager = $util->getSchemaManager();
 
-        // rename('packages/driven/listings/img/kuchen.jpg', 'storage/kuchen.jpg');
-        // rename('packages/driven/listings/img/coffee.jpg', 'storage/coffee.jpg');
+
+        if ($util->tableExists('@system_node')) {
+
+            $tableOld = $util->getTable('@system_node');
+            $table = clone $tableOld;
+        
+            if (!$tableOld->hasColumn('listing_id')) {
+                $table->addColumn('listing_id', 'integer', [
+                    'unsigned' => true,
+                    'length' => 10,
+                    'notnull' => true,
+                    'default' => 0
+                ]);
+            }
+        
+            $comparator = new Comparator();
+            $manager->alterTable($comparator->diffTable($tableOld, $table));
+            
+        }
+
+        if ($util->tableExists('@system_page')) {
+
+            $tableOld = $util->getTable('@system_page');
+            $table = clone $tableOld;
+        
+            if (!$tableOld->hasColumn('listing_id')) {
+                $table->addColumn('listing_id', 'integer', [
+                    'unsigned' => true,
+                    'length' => 10,
+                    'notnull' => true,
+                    'default' => 0
+                ]);
+            }
+        
+            $comparator = new Comparator();
+            $manager->alterTable($comparator->diffTable($tableOld, $table));
+            
+        }
+
+        if ($util->tableExists('@listings_group_type') === false) {
+            $util->createTable('@listings_group_type', function ($table) {
+                $table->addColumn('id', 'integer', ['unsigned' => true, 'length' => 10, 'autoincrement' => true]);
+                $table->addColumn('created_by', 'integer', ['unsigned' => true, 'length' => 10, 'default' => 0]);
+                $table->addColumn('created_on', 'integer', ['notnull' => false, 'length' => 11]);
+                $table->addColumn('modified_by', 'integer', ['unsigned' => true, 'length' => 10, 'default' => 0]);
+                $table->addColumn('modified_on', 'integer', ['notnull' => false, 'length' => 11]);
+                $table->addColumn('title', 'string', ['length' => 255]);
+                $table->addColumn('description', 'string', ['length' => 255]);
+                $table->addColumn('image', 'string', ['length' => 255]);
+                $table->addColumn('settings', 'json_array');
+                $table->addColumn('position', 'smallint');
+                $table->addColumn('status', 'smallint');
+                $table->addColumn('featured_from', 'integer', ['notnull' => false, 'length' => 11]);
+                $table->addColumn('featured_to', 'integer', ['notnull' => false, 'length' => 11]);
+                $table->setPrimaryKey(['id']);
+            });
+        }
 
         if ($util->tableExists('@listings_listing') === false) {
             $util->createTable('@listings_listing', function ($table) {
                 $table->addColumn('id', 'integer', ['unsigned' => true, 'length' => 10, 'autoincrement' => true]);
+                $table->addColumn('group_type_id', 'integer', ['unsigned' => true, 'length' => 10, 'notnull' => false]);
                 $table->addColumn('created_by', 'integer', ['unsigned' => true, 'length' => 10, 'default' => 0]);
                 $table->addColumn('created_on', 'integer', ['notnull' => false, 'length' => 11]);
                 $table->addColumn('modified_by', 'integer', ['unsigned' => true, 'length' => 10, 'default' => 0]);
@@ -62,7 +119,7 @@ return [
                 $table->addColumn('title', 'string', ['length' => 255]);
                 $table->addColumn('description', 'string', ['length' => 255]);
                 $table->addColumn('volume', 'string', ['length' => 255]);
-                $table->addColumn('allergens', 'json_array');
+                $table->addColumn('labels', 'json_array');
                 $table->addColumn('actions', 'json_array');
                 $table->addColumn('image', 'string', ['length' => 255]);
                 $table->addColumn('position', 'smallint');
@@ -72,17 +129,17 @@ return [
                 $table->addColumn('featured_from', 'integer', ['notnull' => false, 'length' => 11]);
                 $table->addColumn('featured_to', 'integer', ['notnull' => false, 'length' => 11]);
                 $table->setPrimaryKey(['id']);
-
             });
         }
 
-        if ($util->tableExists('@listings_allergen') === false) {
-            $util->createTable('@listings_allergen', function ($table) {
+        if ($util->tableExists('@listings_label') === false) {
+            $util->createTable('@listings_label', function ($table) {
                 $table->addColumn('id', 'integer', ['unsigned' => true, 'length' => 10, 'autoincrement' => true]);
                 $table->addColumn('created_by', 'integer', ['unsigned' => true, 'length' => 10, 'default' => 0]);
                 $table->addColumn('created_on', 'integer', ['notnull' => false, 'length' => 11]);
                 $table->addColumn('modified_by', 'integer', ['unsigned' => true, 'length' => 10, 'default' => 0]);
                 $table->addColumn('modified_on', 'integer', ['notnull' => false, 'length' => 11]);
+                $table->addColumn('group_type', 'string', ['length' => 255]);
                 $table->addColumn('title', 'string', ['length' => 255]);
                 $table->addColumn('description', 'string', ['length' => 255]);
                 $table->addColumn('image', 'string', ['length' => 255]);
@@ -107,20 +164,19 @@ return [
                 $table->addColumn('editable', 'smallint', ['default' => 1]);
                 $table->addColumn('locked', 'smallint', ['default' => 0]);
                 $table->setPrimaryKey(['id']);
-
             });
         }
 
         $now = time();
         $app['db']->insert('@listings_template', [
-            'id'=> 1,
+            'id' => 1,
             'created_by' => 1,
             'created_on' => $now,
             'modified_by' => 1,
             'modified_on' => $now,
             'title' => 'Main',
-            'description' => 'Listings built-in configurable template.',
-            'html' => file_get_contents('views/admin/templates/default-template.php', FILE_USE_INCLUDE_PATH),
+            'description' => 'Menu Cards main template.',
+            'html' => file_get_contents('views/admin/templates/main.php', FILE_USE_INCLUDE_PATH),
             'editable' => 1,
             'locked' => 0
         ]);
@@ -138,13 +194,68 @@ return [
             'locked' => 0
         ]);
 
+        $group_types = [
+            ['title' => 'Unsorted', 'description' => 'Default unsorted group, sort it to display on Page', 'image' => '',
+                'settings' => [
+                    'group' => 'unsorted',
+                    'allow_nodes' => false,
+                    'allow_pages' => false
+                ]
+            ],
+            ['title' => 'Menu Cards', 'description' => 'Main menu cards group', 'image' => '',
+                'settings' => [
+                    'group' => 'menucards',
+                    'allow_nodes' => true,
+                    'allow_pages' => true,
+                    'system_defaults' => [
+                        'template' => 'main',
+                        'max_items' => 50
+                    ],
+                    'user_defaults' => [
+                        'show_in_menu' => true
+                    ]
+                ]
+            ],
+            ['title' => 'Mountly Cards', 'description' => 'Monthly card system group', 'image' => '',
+                'settings' => [
+                    'group' => 'mountlycards',
+                    'allow_nodes' => false,
+                    'allow_pages' => false,
+                    'system_defaults' => [
+                        'rotation' => 'monthly'
+                    ],
+                    'user_defaults' => [
+                        'highlight' => false
+                    ]
+                ]
+            ]
+        ];
+        foreach ($group_types as $index => $group_type) {
+            $app['db']->insert('@listings_group_type', [
+                'id' => $index + 1,
+                'created_by' => 1,
+                'created_on' => $now,
+                'modified_by' => 1,
+                'modified_on' => $now,
+                'title' => $group_type['title'],
+                'description' => $group_type['description'],
+                'image' => $group_type['image'],
+                'settings' => $group_type['settings'],
+                'position' => 0,
+                'status' => 1,
+                'featured_from' => 1480575600,
+                'featured_to' => 2060288885
+            ]);
+        }
+
         $listings = [
-            ['title' => 'Getränke', 'description' => '', 'image' => 'storage/getraenke.jpg'],
-            ['title' => 'Speisen', 'description' => '', 'image' => 'storage/kuchen.jpg']
+            ['group_type_id' => '1', 'title' => 'Getränke', 'description' => '', 'image' => 'storage/getraenke.jpg'],
+            ['group_type_id' => '1', 'title' => 'Speisen', 'description' => '', 'image' => 'storage/kuchen.jpg']
         ];
         foreach ($listings as $index => $listing) {
             $app['db']->insert('@listings_listing', [
                 'id' => $index + 1,
+                'group_type_id' => 1,
                 'created_by' => 1,
                 'created_on' => $now,
                 'modified_by' => 1,
@@ -152,7 +263,7 @@ return [
                 'title' => $listing['title'],
                 'description' => $listing['description'],
                 'image' => $listing['image'],
-                'template_id'=>1,
+                'template_id' => 1,
                 'featured_from' => 1480575600,
                 'featured_to' => 2060288885,
                 'position' => $index,
@@ -179,8 +290,8 @@ return [
                 'image' => $category['image'],
                 'position' => $index,
                 'status' => 1,
-                'featured_from'=>1480575600,
-                'featured_to'=>2060288885
+                'featured_from' => 1480575600,
+                'featured_to' => 2060288885
             ]);
         }
 
@@ -214,44 +325,67 @@ return [
                 'title' => $item['title'],
                 'description' => $item['description'],
                 'volume' => '',
-                'allergens' => '{}',
+                'labels' => '{}',
                 'image' => $item['image'],
                 'position' => $index,
                 'status' => 1,
                 'actions' => '{}',
                 'price' => $item['price'],
                 'tags' => '{}',
-                'featured_from'=>1480575600,
-                'featured_to'=>2060288885
+                'featured_from' => 1480575600,
+                'featured_to' => 2060288885
             ]);
         }
 
-        $allergens = [
-            ['title' => 'Eier/-Erzeugnisse', 'description' => 'Eier/-Erzeugnisse', 'image' => 'storage/allergens_icons/egg.svg'],
-            ['title' => 'Erdnüsse/-Erzeugnisse', 'description' => 'Alle Erdnusssorten', 'image' => 'storage/allergens_icons/nuts.svg'],
-            ['title' => 'Fisch/-Erzeugnisse', 'description' => 'Alle Fischarten ( u.a. Anchovis, Kaviar)', 'image' => 'storage/allergens_icons/fisch.svg'],
-            ['title' => 'Glutenhaltiges Getreide/-Erzeugnisse', 'description' => 'u.a. Weizen, Hartweizen, Roggen, Gerste, Hafer', 'image' => 'storage/allergens_icons/gluten.svg'],
-            ['title' => 'Krebstiere/-Erzeugnisse', 'description' => 'u.a. Krebs, Schrimps, Garnelen, Scampi, Hummer', 'image' => 'storage/allergens_icons/garnelen.svg'],
-            ['title' => 'Lupine/-Erzeugnisse', 'description' => 'u.a. Lupinenmehl, Lupinen Konzentrat, Lupinenprotein', 'image' => 'storage/allergens_icons/lupine.svg'],
-            ['title' => 'Milch/-Erzeugnisse', 'description' => 'Alle Milchprodukte', 'image' => 'storage/allergens_icons/dairy.svg'],
-            ['title' => 'Schalenfrüchte (Nüsse) /-Erzeugnisse', 'description' => 'u.a. Mandeln, Haselnüsse, Walnüsse, Pistazien, Cashewkerne', 'image' => 'storage/allergens_icons/peanut.svg'],
-            ['title' => 'Schwefeldioxid/Sulfite', 'description' => 'E220 – E228 u.a. in Trockenobst, Tomatenpüree, Wein', 'image' => 'storage/allergens_icons/sulfites.svg'],
-            ['title' => 'Sellerie/-Erzeugnisse', 'description' => 'Bleichsellerie, Knollensellerie, Staudensellerie', 'image' => 'storage/allergens_icons/celery.svg'],
-            ['title' => 'Senf/-Erzeugnisse', 'description' => 'u.a. auch Senfsprossen, Senfpulver, Senfkörner', 'image' => 'storage/allergens_icons/mustard.svg'],
-            ['title' => 'Sesam/-Erzeugnisse', 'description' => 'u.a. Sesamöl, Sesammehl, Sesamsamen', 'image' => 'storage/allergens_icons/sesam.svg'],
-            ['title' => 'Soja/-Erzeugnisse', 'description' => 'Alle Sorten Sojabohnen', 'image' => 'storage/allergens_icons/soy.svg'],
-            ['title' => 'Weichtiere/-Erzeugnisse', 'description' => 'u.a. Schnecken, Muscheln, Austern, Tintenfisch, Calamares', 'image' => 'storage/allergens_icons/muscheln.svg']
+        $labels = [
+            ['group_type' => 'allergen', 'title' => 'Eier/-Erzeugnisse', 'description' => 'Eier/-Erzeugnisse', 'image' => 'storage/allergens_icons/egg.svg'],
+            ['group_type' => 'allergen', 'title' => 'Erdnüsse/-Erzeugnisse', 'description' => 'Alle Erdnusssorten', 'image' => 'storage/allergens_icons/nuts.svg'],
+            ['group_type' => 'allergen', 'title' => 'Fisch/-Erzeugnisse', 'description' => 'Alle Fischarten ( u.a. Anchovis, Kaviar)', 'image' => 'storage/allergens_icons/fisch.svg'],
+            ['group_type' => 'allergen', 'title' => 'Glutenhaltiges Getreide/-Erzeugnisse', 'description' => 'u.a. Weizen, Hartweizen, Roggen, Gerste, Hafer', 'image' => 'storage/allergens_icons/gluten.svg'],
+            ['group_type' => 'allergen', 'title' => 'Krebstiere/-Erzeugnisse', 'description' => 'u.a. Krebs, Schrimps, Garnelen, Scampi, Hummer', 'image' => 'storage/allergens_icons/garnelen.svg'],
+            ['group_type' => 'allergen', 'title' => 'Lupine/-Erzeugnisse', 'description' => 'u.a. Lupinenmehl, Lupinen Konzentrat, Lupinenprotein', 'image' => 'storage/allergens_icons/lupine.svg'],
+            ['group_type' => 'allergen', 'title' => 'Milch/-Erzeugnisse', 'description' => 'Alle Milchprodukte', 'image' => 'storage/allergens_icons/dairy.svg'],
+            ['group_type' => 'allergen', 'title' => 'Schalenfrüchte (Nüsse) /-Erzeugnisse', 'description' => 'u.a. Mandeln, Haselnüsse, Walnüsse, Pistazien, Cashewkerne', 'image' => 'storage/allergens_icons/peanut.svg'],
+            ['group_type' => 'allergen', 'title' => 'Schwefeldioxid/Sulfite', 'description' => 'E220 – E228 u.a. in Trockenobst, Tomatenpüree, Wein', 'image' => 'storage/allergens_icons/sulfites.svg'],
+            ['group_type' => 'allergen', 'title' => 'Sellerie/-Erzeugnisse', 'description' => 'Bleichsellerie, Knollensellerie, Staudensellerie', 'image' => 'storage/allergens_icons/celery.svg'],
+            ['group_type' => 'allergen', 'title' => 'Senf/-Erzeugnisse', 'description' => 'u.a. auch Senfsprossen, Senfpulver, Senfkörner', 'image' => 'storage/allergens_icons/mustard.svg'],
+            ['group_type' => 'allergen', 'title' => 'Sesam/-Erzeugnisse', 'description' => 'u.a. Sesamöl, Sesammehl, Sesamsamen', 'image' => 'storage/allergens_icons/sesam.svg'],
+            ['group_type' => 'allergen', 'title' => 'Soja/-Erzeugnisse', 'description' => 'Alle Sorten Sojabohnen', 'image' => 'storage/allergens_icons/soy.svg'],
+            ['group_type' => 'allergen', 'title' => 'Weichtiere/-Erzeugnisse', 'description' => 'u.a. Schnecken, Muscheln, Austern, Tintenfisch, Calamares', 'image' => 'storage/allergens_icons/shellfish.svg'],
+            ['group_type' => 'additive', 'title' => 'mit Konservierungsstoff', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'mit Farbstoff', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'mit Antioxidationsmittel', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'mit Süssungsmittel Saccharin', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'mit Süssungsmittel Cyclamat', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'mit Süssungsmittel Aspartam, enth. Phenylalaninquelle', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'mit Süssungsmittel Acesulfam', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'mit Phosphat', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'geschwefelt', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'chininhaltig', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'koffeinhaltig', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'mit Geschmacksverstärker', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'geschwärzt', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'gewachst', 'description' => '', 'image' => ''],
+            ['group_type' => 'additive', 'title' => 'gentechnisch verändert', 'description' => '', 'image' => ''],
+            ['group_type' => 'attribute', 'title' => 'Vegan', 'description' => '', 'image' => ''],
+            ['group_type' => 'attribute', 'title' => 'Vegetarisch', 'description' => '', 'image' => ''],
+            ['group_type' => 'attribute', 'title' => 'Pikant', 'description' => '', 'image' => ''],
+            ['group_type' => 'attribute', 'title' => 'Scharf', 'description' => '', 'image' => ''],
+            ['group_type' => 'attribute', 'title' => 'sehr Scharf', 'description' => '', 'image' => ''],
+            ['group_type' => 'attribute', 'title' => 'mit Alkohol', 'description' => '', 'image' => '']
+
         ];
-        foreach ($allergens as $index => $allergen) {
-            $app['db']->insert('@listings_allergen', [
+        foreach ($labels as $index => $label) {
+            $app['db']->insert('@listings_label', [
                 'id' => $index + 1,
                 'created_by' => 1,
                 'created_on' => $now,
                 'modified_by' => 1,
                 'modified_on' => $now,
-                'title' => $allergen['title'],
-                'description' => $allergen['description'],
-                'image' => $allergen['image'],
+                'group_type' => $label['group_type'],
+                'title' => $label['title'],
+                'description' => $label['description'],
+                'image' => $label['image'],
                 'featured_from' => 1480575600,
                 'featured_to' => 2060288885,
                 'position' => $index,
@@ -268,6 +402,10 @@ return [
             $util->dropTable('@listings_listing');
         }
 
+        if ($util->tableExists('@listings_group_type')) {
+            $util->dropTable('@listings_group_type');
+        }
+
         if ($util->tableExists('@listings_category')) {
             $util->dropTable('@listings_category');
         }
@@ -276,8 +414,8 @@ return [
             $util->dropTable('@listings_item');
         }
 
-        if ($util->tableExists('@listings_allergen')) {
-            $util->dropTable('@listings_allergen');
+        if ($util->tableExists('@listings_label')) {
+            $util->dropTable('@listings_label');
         }
 
         if ($util->tableExists('@listings_template')) {
@@ -304,7 +442,7 @@ return [
                     $comparator = new Comparator;
                     $manager->alterTable($comparator->diffTable($tableOld, $table));
 
-                    $app['db']->update('@listings_template', array('html' => file_get_contents('views/admin/templates/default-template.php', FILE_USE_INCLUDE_PATH)), array('id' => 1));
+                    $app['db']->update('@listings_template', array('html' => file_get_contents('views/admin/templates/main.php', FILE_USE_INCLUDE_PATH)), array('id' => 1));
                     $app['db']->update('@listings_template', array('html' => file_get_contents('views/admin/templates/image-showcase.php', FILE_USE_INCLUDE_PATH),), array('id' => 2));
                 }
             }
