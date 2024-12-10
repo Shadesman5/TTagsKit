@@ -97,7 +97,15 @@ return [
             'icon' => 'system/user:assets/images/icon-users.svg',
             'url' => '@user',
             'active' => '@user(/*)?',
-            'access' => 'user: manage users || user: manage user permissions || system: access settings',
+            'access' => '
+                system: access admin area || 
+                user: manage users || 
+                user: manage user permissions || 
+                system: access settings || 
+                system: manage all userstorages || 
+                system: manage userstorage || 
+                system: manage userstorage read only
+            ',
             'priority' => 115
         ],
         'user: users' => [
@@ -105,7 +113,13 @@ return [
             'parent' => 'user',
             'url' => '@user',
             'active' => '@user(/edit)?',
-            'access' => 'user: manage users',
+            'access' => 'system: access admin area'
+        ],
+        'user: userstorage' => [
+            'label' => 'User Storage',
+            'parent' => 'user',
+            'url' => '@user/userstorage',
+            'access' => 'system: manage all userstorages | system: manage userstorage | system: manage userstorage read only'
         ],
         'user: permissions' => [
             'label' => 'Permissions',
