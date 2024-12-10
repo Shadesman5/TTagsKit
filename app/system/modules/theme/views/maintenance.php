@@ -12,7 +12,9 @@
         <div class="uk-height-viewport uk-flex uk-flex-center uk-flex-middle uk-text-center">
             <div class="tm-container">
 
-                <img class="uk-margin-large-bottom" width="125px" src="<?= $view->url()->getStatic($logo) ?>" alt="TTAGS">
+                <a title="TTags - Simple, Smart, Innovative | Mehr als nur eine Speisekarte" href="https://ttags.de" target="_blank">
+                    <img title="TTags - Simple, Smart, Innovative | Mehr als nur eine Speisekarte" class="uk-margin-large-bottom" width="125px" src="<?= $view->url()->getStatic($logo) ?>" alt="TTags - Simple, Smart, Innovative | Mehr als nur eine Speisekarte">
+                </a>
 
                 <div class="uk-panel uk-panel-box">
                     <h1><?= __('Maintenance') ?></h1>
