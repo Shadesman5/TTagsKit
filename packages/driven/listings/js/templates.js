@@ -9,7 +9,7 @@ $(function () {
                     if (this.templates.hasOwnProperty(key)) size++;
                 }
                 return size;
-            },
+            }
         },
         filters: {
             timeFromEpoch: function (value) {
