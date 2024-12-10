@@ -28,7 +28,7 @@
             </div>
 
         </div>
-        <div data-uk-margin>
+        <div v-show="canManageUsers()" data-uk-margin>
 
             <a class="uk-button uk-button-primary" :href="$url.route('admin/user/edit')">{{ 'Add User' | trans }}</a>
 
