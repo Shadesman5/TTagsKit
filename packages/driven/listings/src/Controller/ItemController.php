@@ -4,7 +4,6 @@ namespace Driven\Listings\Controller;
 
 use Pagekit\Application as App;
 use Driven\Listings\Model\Item;
-use Driven\Listings\Model\Allergen;
 use Driven\Listings\Model\Listing;
 
 /**
@@ -48,7 +47,7 @@ class ItemController
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'volume' => $data['volume'],
-                'allergens' => $data['allergens'],
+                'labels' => $data['labels'],
                 'actions' => $data['actions'],
                 'image' => $data['image'],
                 'position' => $data['position'],
@@ -66,7 +65,7 @@ class ItemController
             $item->title = $data['title'];
             $item->description = $data['description'];
             $item->volume = $data['volume'];
-            $item->allergens = $data['allergens'];
+            $item->labels = $data['labels'];
             $item->actions = $data['actions'];
             $item->image = $data['image'];
             $item->position = $data['position'];
