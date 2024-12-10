@@ -32,16 +32,16 @@ class FinderController
 
         foreach ($finder->depth(0)->in($dir) as $file) {
 
-            if ('-' === $mode = $this->getMode($file->getPathname())) {
+            if ('-' === $itemMode = $this->getMode($file->getPathname())) {
                 continue;
             }
 
             $info = [
                 'name'     => $file->getFilename(),
-                'mime'     => 'application/'.($file->isDir() ? 'folder':'file'),
-                'path'     => $this->normalizePath($path.'/'.$file->getFilename()),
+                'mime'     => 'application/' . ($file->isDir() ? 'folder' : 'file'),
+                'path'     => $this->normalizePath($path . '/' . $file->getFilename()),
                 'url'      => ltrim(App::url()->getStatic($file->getPathname(), [], 'base'), '/'),
-                'writable' => $mode == 'w'
+                'writable' => $itemMode == 'w'
             ];
 
             if (!$file->isDir()) {
@@ -83,8 +83,7 @@ class FinderController
             App::file()->makeDir($path);
 
             return $this->success(__('Directory created.'));
-
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
 
             return $this->error(__('Unable to create directory.'));
         }
@@ -130,7 +129,7 @@ class FinderController
             }
 
             try {
-
+                
                 App::file()->delete($path);
 
             } catch (\Exception $e) {
@@ -178,7 +177,7 @@ class FinderController
 
             return $this->success(__('Upload complete.'));
 
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
 
             return $this->error(__('Unable to upload.'));
         }
@@ -201,19 +200,19 @@ class FinderController
 
     protected function formatFileSize($size)
     {
-      if ($size == 0) {
-          return __('n/a');
-      }
+        if ($size == 0) {
+            return __('n/a');
+        }
 
-      $sizes = [__('%d Bytes'), __('%d  KB'), __('%d  MB'), __('%d  GB'), __('%d TB'), __('%d PB'), __('%d EB'), __('%d ZB'), __('%d YB')];
-      $size  = round($size/pow(1024, ($i = floor(log($size, 1024)))), 2);
-      return sprintf($sizes[$i], $size);
+        $sizes = [__('%d Bytes'), __('%d  KB'), __('%d  MB'), __('%d  GB'), __('%d TB'), __('%d PB'), __('%d EB'), __('%d ZB'), __('%d YB')];
+        $size  = round($size / pow(1024, ($i = floor(log($size, 1024)))), 2);
+        return sprintf($sizes[$i], $size);
     }
 
     protected function getPath($path = '')
     {
         $root = strtr(App::path(), '\\', '/');
-        $path = $this->normalizePath($root.'/'.App::request()->get('root').'/'.App::request()->get('path').'/'.$path);
+        $path = $this->normalizePath($root . '/' . App::request()->get('root') . '/' . App::request()->get('path') . '/' . $path);
 
         return 0 === strpos($path, $root) ? $path : false;
     }
@@ -262,11 +261,13 @@ class FinderController
         return false === strpos($name, '/');
     }
 
-    protected function success($message) {
+    protected function success($message)
+    {
         return compact('message');
     }
 
-    protected function error($message) {
+    protected function error($message)
+    {
         return ['error' => true, 'message' => $message];
     }
 }
