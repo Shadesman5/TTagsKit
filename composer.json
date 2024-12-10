@@ -1,14 +1,14 @@
 {
     "name": "pagekit/pagekit",
     "type": "project",
-    "description": "The TTAGS CMS",
+    "description": "TTagsKit",
     "keywords": ["cms", "pagekit"],
-    "homepage": "http://pagekit.com",
+    "homepage": "https://ttags.de",
     "license": "MIT",
     "authors": [
         {
-            "name": "Pagekit Team",
-            "email": "info@pagekit.com"
+            "name": "TTagsKit Team",
+            "email": "info@ttags.de"
         }
     ],
     "require": {
