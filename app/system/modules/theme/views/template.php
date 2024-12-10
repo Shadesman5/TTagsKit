@@ -25,8 +25,8 @@
                         <div class="uk-dropdown uk-dropdown-navbar tm-dropdown">
                             <ul id="js-appnav" class="uk-sortable uk-grid uk-grid-small uk-grid-width-1-3" data-url="<?= $view->url('@system/adminmenu') ?>" data-uk-sortable="{ dragCustomClass: 'tm-sortable-dragged', handleClass: 'uk-panel' }">
                                 <li v-for="item in nav" :data-id="item.id">
-                                    <a class="uk-panel tm-panel-icon" :href="item.url">
-                                        <img width="50" height="50" :alt="item.label | trans" :src="item.icon">
+                                    <a :title="item.label | trans" class="uk-panel tm-panel-icon" :href="item.url">
+                                        <img :title="item.label | trans" width="50" height="50" :alt="item.label | trans" :src="item.icon">
                                         <p>{{ item.label | trans }}</p>
                                     </a>
                                 </li>
@@ -41,7 +41,7 @@
                         <!-- <li><a class="tm-icon-help" href="https://discord.gg/e7Kw47E" :title="'Get Help' | trans" target="_blank"></a></li> -->
                             <li><a class="tm-icon-visit" :href="$url.route('')" :title="'Visit Site' | trans" target="_blank"></a></li>
                             <li><a class="tm-icon-logout" href="<?= $view->url('@user/logout', ['redirect' => 'admin/login']) ?>" :title="'Logout' | trans"></a></li>
-                            <li class="uk-margin-small-left"><a :href="$url.route('admin/user/edit', {id: user.id})" :title="'Profile' | trans"><img class="uk-border-circle uk-margin-small-right" height="24" width="24" :title="user.name" v-gravatar="user.email"> <span v-text="user.username"></span></a></li>
+                            <li class="uk-margin-small-left"><a :href="$url.route('admin/user/edit', {id: user.id})" :title="'Profile' | trans"><img class="uk-border-circle uk-margin-small-right" height="24" width="24" :title="user.name" :alt="user.name" v-gravatar="user.email"> <span v-text="user.username"></span></a></li>
                         </ul>
 
                     </div>
@@ -50,18 +50,18 @@
                 <nav class="uk-navbar tm-navbar uk-hidden-small" v-show="subnav">
                     <ul class="uk-navbar-nav">
                         <li :class="{ 'uk-active': item.active }" v-for="item in subnav">
-                            <a :href="item.url" v-text="item.label | trans"></a>
+                            <a :title="item.label | trans" :href="item.url" v-text="item.label | trans"></a>
                         </li>
                     </ul>
                 </nav>
 
                 <div class="tm-headerbar uk-flex uk-flex-space-between uk-flex-middle uk-visible-small">
-                    <a class="tm-icon-menu" href="#offcanvas" data-uk-offcanvas></a>
+                    <a title="Mobile Navigation" class="tm-icon-menu" href="#offcanvas" data-uk-offcanvas></a>
 
                     <h1 class="tm-heading uk-h3">{{ item.label | trans }}</h1>
 
-                    <a href="#offcanvas-flip" data-uk-offcanvas>
-                        <img class="uk-border-circle" height="24" width="24" :alt="user.username" v-gravatar="user.email">
+                    <a title="'Profile' | trans" href="#offcanvas-flip" data-uk-offcanvas>
+                        <img :title="user.name" class="uk-border-circle" height="24" width="24" :alt="user.name" v-gravatar="user.email">
                     </a>
                 </div>
 
@@ -80,13 +80,13 @@
                 <ul class="uk-nav uk-nav-offcanvas">
                     <li class="uk-nav-header" v-show="subnav">{{ item.label | trans }}</li>
                     <li :class="{ 'uk-active': item.active }" v-for="item in subnav">
-                        <a :href="item.url">{{ item.label | trans }}</a>
+                        <a :title="item.label | trans" :href="item.url">{{ item.label | trans }}</a>
                     </li>
                     <li class="uk-nav-divider" v-show="subnav"></li>
                     <li class="uk-nav-header">{{ 'Extensions' | trans }}</li>
                     <li :class="{ 'uk-active': item.active }" v-for="item in nav">
-                        <a :href="item.url">
-                            <img class="uk-margin-small-right" width="34" height="34" :alt="item.label | trans" :src="item.icon"> {{ item.label | trans }}
+                        <a :title="item.label | trans" :href="item.url">
+                            <img :title="item.label | trans" class="uk-margin-small-right" width="34" height="34" :alt="item.label | trans" :src="item.icon"> {{ item.label | trans }}
                         </a>
                     </li>
                 </ul>
@@ -99,9 +99,9 @@
 
                 <ul class="uk-nav uk-nav-offcanvas">
                     <li class="uk-nav-header">{{ user.username }}</li>
-                    <li><a :href="$url.route('')" target="_blank">{{ 'Visit Site' | trans }}</a></li>
-                    <li><a :href="$url.route('admin/user/edit', {id: user.id})">{{ 'Settings' | trans }}</a></li>
-                    <li><a href="<?= $view->url('@user/logout', ['redirect' => 'admin/login']) ?>">{{ 'Logout' | trans }}</a></li>
+                    <li><a :title="'Visit Site' | trans" :href="$url.route('')" target="_blank">{{ 'Visit Site' | trans }}</a></li>
+                    <li><a :title="'Edit User' | trans" :href="$url.route('admin/user/edit', {id: user.id})">{{ 'Edit User' | trans }}</a></li>
+                    <li><a :title="'Logout' | trans" href="<?= $view->url('@user/logout', ['redirect' => 'admin/login']) ?>">{{ 'Logout' | trans }}</a></li>
                 </ul>
 
             </div>
