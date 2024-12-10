@@ -4,34 +4,46 @@ $(function () {
         item_form: {},
         list_form: {},
         new_tag: {title: ''},
-        // allergens: Array.isArray($data.allergens) ? $data.allergens : [],
-        selectedAllergenIds: []
+        selectedLabel: [],
+        listing: $data.listing,
+        group_types: $data.group_types
     });
 
     var vue = new Vue({
         el: '#edit-listing',
         data: $data,
         watch: {
-            selectedAllergenIds(newIds) {
-                // Umwandeln von allergens in ein echtes Array
-                let allergensArray = Array.isArray(this.allergens) ? this.allergens : Object.values(this.allergens);
+            selectedLabel(newIds) {
+                // Convert labels into a real array
+                let labelsArray = Array.isArray(this.labels) ? this.labels : Object.values(this.labels);
 
-                if (Array.isArray(allergensArray)) {
-                    this.item_model.allergens = allergensArray.filter(allergen => newIds.includes(allergen.id));
+                if (Array.isArray(labelsArray)) {
+                    this.item_model.labels = labelsArray
+                        .filter(label => label.status === 1)
+                        .filter(label => newIds.includes(label.id));
                 } else {
-                    console.error('allergens could not be converted to an array:', this.allergens);
+                    console.error('labels could not be converted to an array:', this.labels);
                 }
             }
         },
-        created() {
-            // Sicherstellen, dass allergens in ein echtes Array umgewandelt wird
-            let allergensArray = Array.isArray(this.allergens) ? this.allergens : Object.values(this.allergens);
+        computed: {
+            label() {
+                let labelsArray = Array.isArray(this.labels) ? this.labels : Object.values(this.labels);
 
-            console.log('allergensArray:', allergensArray); // Ausgabe des Arrays zur Überprüfung
-
-            this.selectedAllergenIds = allergensArray.map(allergen => allergen.id);
+                return labelsArray.filter(label => label.status === 1).reduce((acc, label) => {
+                    let typePlural = label.group_type + 's'; // Dynamic types as plural (e.g. 'allergens', 'additives')
+                    if (!acc[typePlural]) {
+                        acc[typePlural] = [];
+                    }
+                    acc[typePlural].push(label);
+                    return acc;
+                }, {});
+            }
         },
         methods: {
+            selectGroup(group_type) {
+                this.listing.group_type = group_type;
+            },
             toggle: function (coll, type) {
                 coll.status = !coll.status ? 1 : 0;
                 if (type === 'category') {
@@ -96,7 +108,6 @@ $(function () {
                 });
             },
 
-
             openCategoryModal: function (data) {
                 setModel('categories', data);
                 this.$refs.categorymodal.open();
@@ -109,8 +120,16 @@ $(function () {
                 data = data || {category_id: id};
                 setModel('items', data);
 
-                // Allergene ID's initialisieren
-                this.selectedAllergenIds = this.item_model.allergens.map(allergen => allergen.id);
+                // Convert labels into a real array
+                let labelsArray = Array.isArray(this.labels) ? this.labels : Object.values(this.labels);
+
+                // Filter only the active labels
+                let activeLabels = labelsArray.filter(label => label.status === 1);
+
+                // Initialize the selected labels with active labels only
+                this.selectedLabel = activeLabels
+                    .filter(activeLabel => this.item_model.labels.some(itemLabel => itemLabel.id === activeLabel.id))
+                    .map(activeLabel => activeLabel.id);
 
                 this.$refs.itemmodal.open();
             },
@@ -125,13 +144,11 @@ $(function () {
             },
 
             savePositions: function (positions, type) {
-
                 if (!positions || !positions.length) return;
-
                 this.$http.post('admin/listings/positions', {positions: positions, type: type}).then(
                     function (res) {
                         UIkit.notify('Order Updated');
-                        //this.listing.categories = res.data.listing.categories;
+                        // this.listing.categories = res.data.listing.categories;
                     }).catch(function () {
                     UIkit.notify('Couldn\'t Update Order');
                 })
@@ -163,13 +180,16 @@ $(function () {
 
                 this.item = this.item_model;
 
-                // save the selected allergens
-                this.item.allergens = this.item.allergens.map(allergen => {
+                let activeLabels = this.item_model.labels.filter(label => label.status === 1);
+
+                // save the selected labels
+                this.item_model.labels = activeLabels.map(label => {
                     return {
-                        id: allergen.id,
-                        title: allergen.title,
-                        description: allergen.description,
-                        image: allergen.image
+                        id: label.id,
+                        group_type: label.group_type,
+                        title: label.title,
+                        description: label.description,
+                        image: label.image
                     };
                 });
 
@@ -214,7 +234,15 @@ $(function () {
                 d.setUTCSeconds(value);
                 return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
             }
-        }
+        },
+        ready() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const groupTypeId = urlParams.get('group_type_id');
+    
+            if (groupTypeId) {
+                this.listing.group_type_id = parseInt(groupTypeId, 10);
+            }
+        },
     });
 
     var setModel = function (type, model) {
@@ -232,7 +260,7 @@ $(function () {
             Vue.set(this.$data.item_model, 'title', model.title || '');
             Vue.set(this.$data.item_model, 'description', model.description || '');
             Vue.set(this.$data.item_model, 'volume', model.volume || '');
-            Vue.set(this.$data.item_model, 'allergens', model.allergens || []);
+            Vue.set(this.$data.item_model, 'labels', model.labels || []);
             Vue.set(this.$data.item_model, 'actions', model.actions || '');
             Vue.set(this.$data.item_model, 'image', model.image || '');
             Vue.set(this.$data.item_model, 'position', ((typeof(model.position) !== 'undefined') ? String(model.position) : false) || +1 * _.size(this.$data.listing.categories[this.$data.item_model.category_id].items));
@@ -244,7 +272,6 @@ $(function () {
 
     $('#sortable-categories').on('change.uk.sortable', _.debounce(function (e) {
         var rows = $(e.currentTarget).children(), positions = [];
-        console.log("Rows before sorting:", rows);  // Log before sorting
         _.each(rows, function (row, i) {
             positions.push({id: $(row).data().id, position: i});
         });
