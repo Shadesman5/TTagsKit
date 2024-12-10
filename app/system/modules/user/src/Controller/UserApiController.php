@@ -8,7 +8,7 @@ use Pagekit\User\Model\Role;
 use Pagekit\User\Model\User;
 
 /**
- * @Access("user: manage users")
+ * @Access("system: access admin area")
  */
 class UserApiController
 {
@@ -22,6 +22,20 @@ class UserApiController
         $filter = array_merge(array_fill_keys(['status', 'search', 'role', 'order', 'access'], ''), $filter);
         extract($filter, EXTR_SKIP);
 
+        $currentUser = App::user();
+
+        // Filter users based on permissions
+        if ($currentUser->isAdministrator()) {
+            // Administrators can see all users
+        } elseif ($currentUser->hasAccess('user: manage users')) {
+            // Users with "manage users" permission can see all users except administrators
+            $query->where('id IS NOT 1');
+        } else {
+            // Users without special permissions can only see themselves
+            $query->where(['id' => $currentUser->id]);
+        }
+
+
         if (is_numeric($status)) {
 
             $query->where(['status' => (int) $status]);
@@ -29,7 +43,6 @@ class UserApiController
             if ($status) {
                 $query->where('login IS NOT NULL');
             }
-
         } elseif ('new' == $status) {
             $query->where(['status' => User::STATUS_ACTIVE, 'login IS NULL']);
         }
@@ -45,7 +58,7 @@ class UserApiController
         }
 
         if ($access) {
-            $query->whereExists(function($query) use ($access) {
+            $query->whereExists(function ($query) use ($access) {
                 $query
                     ->select('id')->from('@system_auth as a')
                     ->where('a.user_id = @system_user.id')
@@ -56,7 +69,7 @@ class UserApiController
         if (preg_match('/^(username|name|email|registered|login)\s(asc|desc)$/i', $order, $match)) {
             $order = $match;
         } else {
-            $order = [1=>'username', 2=>'asc'];
+            $order = [1 => 'username', 2 => 'asc'];
         }
 
         $default = App::module('system/user')->config('users_per_page');
@@ -70,6 +83,7 @@ class UserApiController
     }
 
     /**
+     * @Access("user: manage users")
      * @Request({"filter": "array"})
      */
     public function countAction($filter = [])
@@ -85,7 +99,6 @@ class UserApiController
             if ($status) {
                 $query->where('login IS NOT NULL');
             }
-
         } elseif ('new' == $status) {
             $query->where(['status' => User::STATUS_ACTIVE, 'login IS NULL']);
         }
@@ -101,7 +114,7 @@ class UserApiController
         }
 
         if ($access) {
-            $query->whereExists(function($query) use ($access) {
+            $query->whereExists(function ($query) use ($access) {
                 $query
                     ->select('id')->from('@system_auth as a')
                     ->where('a.user_id = @system_user.id')
@@ -115,6 +128,7 @@ class UserApiController
     }
 
     /**
+     * @Access("user: manage users")
      * @Route("/{id}", methods="GET", requirements={"id"="\d+"})
      */
     public function getAction($id)
@@ -133,13 +147,22 @@ class UserApiController
      */
     public function saveAction($data, $password = null, $id = 0)
     {
+        $currentUser = App::user();
         try {
 
-            // is new ?
-            if (!$user = User::find($id)) {
-
-                if ($id) {
+            if ($id) {
+                $user = User::find($id);
+                if (!$user) {
                     App::abort(404, __('User not found.'));
+                }
+
+                if ($currentUser->id !== $user->id && !$currentUser->hasAccess('user: manage users')) {
+                    App::abort(403, __('Insufficient User Permissions.'));
+                }
+            } else {
+
+                if (!$currentUser->hasAccess('user: manage users')) {
+                    App::abort(403, __('Insufficient User Permissions.'));
                 }
 
                 if (!$password) {
@@ -175,12 +198,16 @@ class UserApiController
                 $user->password = App::get('auth.password')->hash($password);
             }
 
-            $key    = array_search(Role::ROLE_ADMINISTRATOR, @$data['roles'] ?: []);
-            $add    = false !== $key && !$user->isAdministrator();
-            $remove = false === $key && $user->isAdministrator();
+            if ($currentUser->hasAccess('user: manage users') && isset($data['roles'])) {
+                $key    = array_search(Role::ROLE_ADMINISTRATOR, @$data['roles'] ?: []);
+                $add    = false !== $key && !$user->isAdministrator();
+                $remove = false === $key && $user->isAdministrator();
 
-            if (($self && $remove) || !App::user()->isAdministrator() && ($remove || $add)) {
-                App::abort(403, 'Cannot add/remove Admin Role.');
+                if (($self && $remove) || !App::user()->isAdministrator() && ($remove || $add)) {
+                    App::abort(403, 'Cannot add/remove Admin Role.');
+                }
+
+                $user->roles = $data['roles'];
             }
 
             unset($data['login'], $data['registered']);
@@ -188,14 +215,28 @@ class UserApiController
             $user->validate();
             $user->save($data);
 
-            return ['message' => 'success', 'user' => $user];
+            // create user specific directory
+            if (!$id) {
+                $userDir = App::path() . '/userstorage/' . $user->id;
 
+                if (!is_dir($userDir)) {
+                    mkdir($userDir, 0755, true);
+
+                    // Create subdirectories: Contracts, Invoices, Material
+                    mkdir($userDir . '/Contracts', 0755, true);
+                    mkdir($userDir . '/Invoices', 0755, true);
+                    mkdir($userDir . '/Material', 0755, true);
+                }
+            }
+
+            return ['message' => 'success', 'user' => $user];
         } catch (Exception $e) {
             App::abort(400, $e->getMessage());
         }
     }
 
     /**
+     * @Access("user: manage users")
      * @Route("/{id}", methods="DELETE", requirements={"id"="\d+"})
      * @Request({"id": "int"}, csrf=true)
      */
@@ -210,13 +251,42 @@ class UserApiController
                 App::abort(400, __('Unable to delete administrator.'));
             }
 
+            // Path to the user's storage directory
+            $userDir = App::path() . '/userstorage/' . $user->id;
+
             $user->delete();
+
+            // Attempt to delete the user's directory
+            $this->deleteDirectory($userDir);
         }
 
         return ['message' => 'success'];
     }
 
     /**
+     * @Access("system: manage all userstorages, system: manage userstorage")
+     * Recursively deletes a directory and its contents
+     *
+     * @param string $dir Path to the directory
+     * @return bool
+     */
+    protected function deleteDirectory($dir)
+    {
+        if (!is_dir($dir)) {
+            return false;
+        }
+
+        $items = array_diff(scandir($dir), ['.', '..']);
+        foreach ($items as $item) {
+            $itemPath = $dir . DIRECTORY_SEPARATOR . $item;
+            is_dir($itemPath) ? $this->deleteDirectory($itemPath) : unlink($itemPath);
+        }
+
+        return rmdir($dir);
+    }
+
+    /**
+     * @Access("user: manage users")
      * @Route("/bulk", methods="POST")
      * @Request({"users": "array"}, csrf=true)
      */
@@ -230,6 +300,7 @@ class UserApiController
     }
 
     /**
+     * @Access("user: manage users")
      * @Route("/bulk", methods="DELETE")
      * @Request({"ids": "array"}, csrf=true)
      */
