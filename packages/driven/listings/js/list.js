@@ -8,6 +8,11 @@ $(function () {
             el: 'driven-listing-container[data-list="' + index + '"] slot',
             data: window['$listing_'+index],
             template: window['$listing_'+index].template.html,
+            methods: {
+                hasGroupType(labels, group_type) {
+                    return labels.some(label => label.group_type === group_type);
+                }
+            },
             filters: {
                 timeFromEpoch: function (value) {
                     if (!value) return;
