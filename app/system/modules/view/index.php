@@ -47,7 +47,7 @@ return [
 
         'view.init' => [function ($event, $view) {
             $view->defer('head');
-            $view->meta(['generator' => 'TTAGS - System']);
+            $view->meta(['generator' => 'TTagsKit']);
             $view->addGlobal('params', new ArrObject());
         }, 20],
 
