@@ -12,11 +12,14 @@ use Pagekit\User\Model\User;
 class UserController
 {
     /**
-     * @Access("user: manage users")
+     * @Access("system: access admin area")
      * @Request({"filter": "array", "page":"int"})
      */
     public function indexAction($filter = [], $page = null)
     {
+        $currentUser = App::user();
+        $canManageUsers = $currentUser->hasAccess('user: manage users');
+
         $roles = $this->getRoles();
         unset($roles[Role::ROLE_AUTHENTICATED]);
 
@@ -31,25 +34,41 @@ class UserController
                     'roles' => array_values($roles),
                     'emailVerification' => App::module('system/user')->config('require_verification'),
                     'filter' => (object) $filter,
-                    'page' => $page
+                    'page' => $page,
+                    'canManageUsers' => $canManageUsers
                 ]
             ]
         ];
     }
 
     /**
-     * @Access("user: manage users")
      * @Request({"id": "int"})
      */
     public function editAction($id = 0)
     {
-        if (!$id) {
+        $currentUser = App::user();
+
+        if ($id === 0) {
+
+            if (!$currentUser->hasAccess('user: manage users')) {
+                App::abort(403, __('Insufficient User Permissions.'));
+            }
 
             $user = User::create(['roles' => [Role::ROLE_AUTHENTICATED]]);
+        } else {
 
-        } else if (!$user = User::find($id)) {
-            App::abort(404, 'User not found.');
+            $user = User::find($id);
+
+            if (!$user) {
+                App::abort(404, 'User not found.');
+            }
+
+            if ($currentUser->id !== $user->id && !$currentUser->hasAccess('user: manage users')) {
+                App::abort(403, __('Insufficient User Permissions.'));
+            }
         }
+
+        $canManageUsers = $currentUser->hasAccess('user: manage users');
 
         return [
             '$view' => [
@@ -62,7 +81,8 @@ class UserController
                     'statuses' => User::getStatuses(),
                     'roles' => array_values($this->getRoles($user)),
                     'emailVerification' => App::module('system/user')->config('require_verification'),
-                    'currentUser' => App::user()->id
+                    'currentUser' => App::user()->id,
+                    'canManageUsers' => $canManageUsers
                 ]
             ]
         ];
