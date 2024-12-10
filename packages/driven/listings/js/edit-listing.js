@@ -244,6 +244,7 @@ $(function () {
 
     $('#sortable-categories').on('change.uk.sortable', _.debounce(function (e) {
         var rows = $(e.currentTarget).children(), positions = [];
+        console.log("Rows before sorting:", rows);  // Log before sorting
         _.each(rows, function (row, i) {
             positions.push({id: $(row).data().id, position: i});
         });
