@@ -18,8 +18,8 @@
                 <img class="uk-margin-large-bottom" src="<?= $view->url()->getStatic('app/system/assets/images/ttags-logo.png') ?>" width="125" alt="TTAGS">
 
                 <form class="uk-panel uk-panel-box" action="<?= $view->url('@system/migration/migrate') ?>">
-                    <h1><?= __('Update TTAGS System') ?></h1>
-                    <p><?= __('TTAGS System has been updated! Before we send you on your way, we have to update your database to the newest version.') ?></p>
+                    <h1><?= __('Update TTagsKit') ?></h1>
+                    <p><?= __('TTagsKit has been updated! Before we send you on your way, we have to update your database to the newest version.') ?></p>
                     <p>
                         <?php if ($redirect): ?>
                             <input type="hidden" name="redirect" value="<?php echo $redirect ?>">
