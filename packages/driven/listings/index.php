@@ -24,9 +24,9 @@ return [
             'title' => 'Manage lists',
             'description' => 'Create, edit, delete and publish lists'
         ],
-        'listings: manage allergens' => [
-            'title' => 'Manage Allergens',
-            'description' => 'Create, edit and delete allergens'
+        'listings: manage labels' => [
+            'title' => 'Manage Labels',
+            'description' => 'Create, edit and delete labels'
         ],
         'listings: manage templates' => [
             'title' => 'Manage Templates',
@@ -40,25 +40,27 @@ return [
             'listingTitle' => 'uk-h1',
             'listingDescription' => '',
 
-            'categoryTitleDescription'=>'uk-margin-small-bottom uk-margin-small-top',
+            'categoryTitleDescription' => 'uk-margin-small-bottom uk-margin-small-top',
             'categoryTitle' => 'uk-h2 uk-text-center uk-text-uppercase uk-margin-remove',
             'categoryDescription' => 'uk-text-large uk-text-center',
-            'categoryImage' => 'uk-thumbnail',
+            'categoryImage' => 'uk-thumbnail uk-border-rounded',
 
-            'itemContainer'=>'',
-            'itemTitleDescription' => 'uk-width-expand uk-flex-item-1',
-            'itemTitle' => 'uk-h5',
+            'itemContainer' => 'uk-margin-small-bottom uk-padding-small-bottom itemContainer',
+            'itemTitleDescription' => 'uk-flex-item-auto uk-margin-small-right',
+            'itemTitle' => 'uk-h4',
             'itemDescription' => '',
-
-            'itemVolume' => 'uk-width-auto uk-text-right',
-            'itemPrice' => 'uk-width-auto uk-text-right uk-text-medium',
-            'itemImage' => 'uk-width-auto',
-            'itemTagsContainer' => 'uk-margin-top uk-text-bold uk-text-primary',
+            'itemTagsContainer' => 'uk-margin-small-top uk-text-bold uk-text-primary',
             'itemTag' => 'uk-badge',
-            'itemAllergensContainer' => 'allergens uk-margin-small-top uk-text-primary',
-            'itemAllergen' => ''
+            'itemLabelsContainer' => 'labels uk-margin-small-top uk-width',
+            'itemLabelImage' => '',
 
+            'itemModalLabel' => 'uk-width uk-thumbnail modalLabel',
 
+            'itemPriceVolume' => 'uk-text-right uk-flex-item-none uk-text-medium uk-text-primary',
+            'itemPrice' => 'uk-width-auto uk-margin-small-right',
+            'itemVolume' => 'uk-width-auto uk-margin-small-right',
+
+            'itemImage' => 'uk-flex-item-none uk-overflow-hidden uk-border-rounded'
         ]
     ],
 
@@ -68,6 +70,10 @@ return [
             'name' => '@listings',
             'controller' => 'Driven\\Listings\\Controller\\ListingsController'
         ],
+        '/listings/group_types' => [
+            'name' => '@listings/group_types',
+            'controller' => 'Driven\\Listings\\Controller\\GroupTypesController'
+        ],
         '/listings/category' => [
             'name' => '@listings/category',
             'controller' => 'Driven\\Listings\\Controller\\CategoryController'
@@ -76,9 +82,9 @@ return [
             'name' => '@listings/category/item',
             'controller' => 'Driven\\Listings\\Controller\\ItemController'
         ],
-        '/listings/allergens' => [
-            'name' => '@listings/allergens',
-            'controller' => 'Driven\\Listings\\Controller\\AllergensController'
+        '/listings/labels' => [
+            'name' => '@listings/labels',
+            'controller' => 'Driven\\Listings\\Controller\\LabelsController'
         ],
         '/listings/templates' => [
             'name' => '@listings/templates',
@@ -94,12 +100,11 @@ return [
     'menu' => [
 
         'listings' => [
-            'access' => 'listings: manage lists',
             'label' => 'Menu Cards',
             'icon' => 'driven/listings:icon.svg',
             'url' => '@listings',
-            'active' => '@listings*'
-
+            'active' => '@listings*',
+            'access' => 'listings: manage lists'
         ],
 
         'listings: root' => [
@@ -108,11 +113,11 @@ return [
             'url' => '@listings'
         ],
 
-        'listings: allergens' => [
-            'access' => 'listings: manage allergens',
+        'listings: labels' => [
+            'access' => 'listings: manage labels',
             'parent' => 'listings',
-            'label' => 'Allergens',
-            'url' => '@listings/allergens'
+            'label' => 'Labels',
+            'url' => '@listings/labels'
         ],
 
         'listings: templates' => [
@@ -128,5 +133,9 @@ return [
             'label' => 'Info',
             'url' => '@listings/info'
         ]
+    ],
+
+    'widgets' => [
+        'widgets/ListingsWidget.php'
     ]
 ];
