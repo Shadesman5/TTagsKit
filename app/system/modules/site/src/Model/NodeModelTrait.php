@@ -90,6 +90,9 @@ trait NodeModelTrait
             $node->slug = $node->title;
         }
 
+        // Clear the slug
+        $node->slug = self::sanitizeSlug($node->slug);
+
         // A node cannot have itself as a parent
         if ($node->parent_id === $node->id) {
             $node->parent_id = 0;
@@ -130,6 +133,18 @@ trait NodeModelTrait
                     ->execute()
                     ->fetchColumn();
         }
+    }
+
+    /**
+     * Sanitizes the slug by replacing special characters and umlauts.
+     */
+    protected static function sanitizeSlug($slug)
+    {
+        return preg_replace('/[^a-zA-Z0-9\-]/', '', str_replace(
+            ['Ä', 'Ö', 'Ü', 'ä', 'ö', 'ü', 'ß', ' '],
+            ['A', 'O', 'U', 'ae', 'oe', 'ue', 'ss', '-'],
+            $slug
+        ));
     }
 
     /**
