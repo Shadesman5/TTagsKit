@@ -11,7 +11,7 @@
             animation_speed: 600,
             animation_easing: 'swing',
             animation: 'slide',
-            inherit_width_from: window,
+            inherit_width_from: '#slides',
             inherit_height_from: window,
             pagination: true,
             hashchange: false,
