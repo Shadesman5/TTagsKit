@@ -5,9 +5,14 @@ namespace Driven\Listings\Controller;
 use Driven\Listings\Model\ListingCategory as Category;
 use Driven\Listings\Model\Item;
 use Driven\Listings\Model\Template;
-use Driven\Listings\Model\Allergen;
+use Driven\Listings\Model\Label;
 use Pagekit\Application as App;
+use Driven\Listings\Model\GroupType;
 use Driven\Listings\Model\Listing;
+
+use Driven\Listings\Utils\NodeManager;
+use Driven\Listings\Model\ListingNode;
+use Driven\Listings\Model\ListingPage;
 
 /**
  * @Access(admin=true)
@@ -18,20 +23,26 @@ class ListingsController
 
     public function indexAction()
     {
+        $group_types = GroupType::findAll();
 
         $data = Listing::query()
-            ->related(['editor' => function($query) {
+            ->related(['editor' => function ($query) {
                 return $query->select('id', 'username');
             }])
             ->related('template')->get();
 
-        return [
+        $payload = [
             '$view' => [
                 'title' => 'Listings',
                 'name' => 'driven/listings:views/admin/index.php'
             ],
-            '$data' => $data
+            '$data' => [
+                'listings' => $data,
+                'group_types' => array_values($group_types)
+            ]
         ];
+
+        return $payload;
     }
 
     /**
@@ -61,8 +72,11 @@ class ListingsController
                     App::abort(404, __('Invalid listing id.'));
                 }
 
+                $maxPosition = Listing::query()->max('position');
+
                 $listing = [
                     'id' => 0,
+                    'group_type_id' => 1,
                     'created_by' => $user->id,
                     'created_on' => $now,
                     'modified_by' => $user->id,
@@ -70,13 +84,12 @@ class ListingsController
                     'title' => '',
                     'description' => '',
                     'image' => '',
-                    'template_id' => 0,
-                    'featured_from'=>1480575600,
-                    'featured_to'=>2060288885,
-                    'position' => 0,
+                    'template_id' => 1,
+                    'featured_from' => 1480575600,
+                    'featured_to' => 2060288885,
+                    'position' => is_null($maxPosition) ? 0 : $maxPosition - 1,
                     'status' => 1
                 ];
-
             }
 
             $category = [
@@ -99,7 +112,7 @@ class ListingsController
                 'title' => '',
                 'description' => '',
                 'volume' => '',
-                'allergens' => [],
+                'labels' => [],
                 'image' => '',
                 'position' => 0,
                 'status' => 1,
@@ -109,19 +122,21 @@ class ListingsController
 
             $templates = Template::findAll();
 
-            $allergens = Allergen::findAll();
+            $group_types = GroupType::findAll();
 
-//            // Sort Categories and Update Key Index
-//            usort($listing->categories, function ($a, $b) {
-//                return ($a->position < $b->position) ? -1 : (($a->position > $b->position) ? 1 : 0);
-//            });
-//
-//            // Sort Items and Update Key Index
-//            foreach($listing->categories as $sortCategory){
-//                usort($sortCategory->items, function ($a, $b) {
-//                    return ($a->position < $b->position) ? -1 : (($a->position > $b->position) ? 1 : 0);
-//                });
-//            }
+            $labels = Label::findAll();
+
+            //            // Sort Categories and Update Key Index
+            //            usort($listing->categories, function ($a, $b) {
+            //                return ($a->position < $b->position) ? -1 : (($a->position > $b->position) ? 1 : 0);
+            //            });
+            //
+            //            // Sort Items and Update Key Index
+            //            foreach($listing->categories as $sortCategory){
+            //                usort($sortCategory->items, function ($a, $b) {
+            //                    return ($a->position < $b->position) ? -1 : (($a->position > $b->position) ? 1 : 0);
+            //                });
+            //            }
 
             $payload = [
                 '$view' => [
@@ -130,22 +145,21 @@ class ListingsController
                 ],
                 '$data' => [
                     'listing' => $listing,
+                    'group_types' => $group_types,
                     'templates' => $templates,
                     'category_model' => $category,
                     'item_model' => $item,
-                    'allergens' => $allergens
+                    'labels' => $labels
                 ]
             ];
 
             return $payload;
-
         } catch (\Exception $e) {
 
             App::message()->error($e->getMessage());
 
             return App::redirect('@listings');
         }
-
     }
 
     /**
@@ -167,6 +181,7 @@ class ListingsController
         if (!$id || !$listing = Listing::find($id)) {
 
             $listing = Listing::create([
+                'group_type_id' => $data['group_type_id'],
                 'created_by' => $user->id,
                 'created_on' => $now,
                 'modified_by' => $user->id,
@@ -179,9 +194,9 @@ class ListingsController
                 'featured_to' => $featured_to,
                 'position' => $data['position'],
                 'status' => 1
-
             ]);
         } else {
+            $listing->group_type_id = $data['group_type_id'];
             $listing->modified_by = $user->id;
             $listing->modified_on = $now;
             $listing->title = $data['title'];
@@ -196,8 +211,22 @@ class ListingsController
 
         $listing->save();
 
-        return ['message' => 'success', 'listing' => $listing];
+        // Update Nodes and Pages
+        $groupType = GroupType::find($listing->group_type_id);
+        $groupIdentifier = $groupType->settings['group'] ?? '';
+        $allowPages = !empty($groupType->settings['allow_pages']);
+        $allowNodes = !empty($groupType->settings['allow_nodes']);
 
+        $listingNode = ListingNode::query()->where('listing_id = ?', [$listing->id])->first();
+        $listingPage = ListingPage::query()->where('listing_id = ?', [$listing->id])->first();
+
+        if ($allowNodes || $allowPages) {
+            NodeManager::updateNodePage($listing, $groupType, $groupIdentifier, $allowPages, $allowNodes, $listingNode, $listingPage);
+        } else {
+            NodeManager::removeNodePage($listing, $groupIdentifier, $listingNode, $listingPage);
+        }
+
+        return ['message' => 'success', 'listing' => $listing];
     }
 
     /**
@@ -207,7 +236,17 @@ class ListingsController
     {
         $user = App::user();
         $now = time();
-        $listing_id =[];
+        $listing_id = [];
+
+        if ($type == 'listings') {
+            foreach ($positions as &$position) {
+                $listing = Listing::find($position['id']);
+                $listing->position = $position['position'];
+                $listing->modified_by = $user->id;
+                $listing->modified_on = $now;
+                $listing->save();
+            }
+        }
 
         if ($type == 'categories') {
             foreach ($positions as &$position) {
@@ -235,7 +274,6 @@ class ListingsController
             $listing->save();
         }
 
-
         return ['message' => 'success', 'listing' => $listing];
     }
 
@@ -255,23 +293,33 @@ class ListingsController
 
             } else {
 
-                $categories = Category::query()->where('listing_id = ?',[$id])->get();
-                $items = Item::query()->where('listing_id = ?',[$id])->get();
+                $categories = Category::query()->where('listing_id = ?', [$id])->get();
+                $items = Item::query()->where('listing_id = ?', [$id])->get();
 
-                foreach ($items as $item){
+                foreach ($items as $item) {
                     $item->delete();
                 }
 
-                foreach ($categories as $category){
+                foreach ($categories as $category) {
                     $category->delete();
                 }
+
+                // Load group type and settings
+                $groupType = GroupType::find($listing->group_type_id);
+                $groupIdentifier = $groupType->settings['group'] ?? '';
+
+                // Fetch nodes and pages
+                $listingNode = ListingNode::query()->where('listing_id = ?', [$listing->id])->first();
+                $listingPage = ListingPage::query()->where('listing_id = ?', [$listing->id])->first();
+
+                // Remove nodes and pages for listings and groups if conditions are not met.
+                NodeManager::removeNodePage($listing, $groupIdentifier, $listingNode, $listingPage);
 
                 $cached = $listing;
                 $listing->delete();
             }
 
             return ['message' => 'success', 'listing' => $cached];
-
         } elseif ($type == 'category') {
 
             if (!$id || !$category = Category::find($id)) {
@@ -286,7 +334,7 @@ class ListingsController
                 $listing->save();
 
                 $items = Item::query()->where('category_id = ?', [$category->id])->get();
-                foreach ($items as $item){
+                foreach ($items as $item) {
                     $item->delete();
                 }
 
@@ -295,7 +343,6 @@ class ListingsController
             }
 
             return ['message' => 'success', 'category' => $cached];
-
         } elseif ($type == 'item') {
 
             if (!$id || !$item = Item::find($id)) {
@@ -313,8 +360,5 @@ class ListingsController
 
             return ['message' => 'success', 'item' => $cached];
         }
-
-
     }
-
 }

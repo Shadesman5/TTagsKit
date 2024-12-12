@@ -47,7 +47,7 @@ class Item
     public $volume;
 
     /** @Column(type="json_array") */
-    public $allergens;
+    public $labels;
 
     /** @Column(type="json_array") */
     public $actions;

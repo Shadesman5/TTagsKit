@@ -1,6 +1,8 @@
 <v-modal v-ref:headlinemodal large>
 
     <form class="uk-form" v-validator="item_form" @submit.prevent="saveItem(category_model.id) | valid">
+        <input name="headline" placeholder="{{ 'Headline' | trans }}"
+            class="uk-hidden" type="text" v-model="item_model.actions" value="itemHeadline" />
         <div class="uk-modal-header uk-flex uk-flex-wrap uk-flex-space-between uk-flex-middle">
 
             <h2>{{ item_model.id ? 'Edit Headline' : 'New Headline' | trans }}

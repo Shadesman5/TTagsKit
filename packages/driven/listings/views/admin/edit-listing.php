@@ -1,4 +1,4 @@
-<?php $view->script('edit-listing', 'driven/listings:js/edit-listing.js', ['vue', 'editor', 'uikit-nestable', 'uikit-tooltip', 'uikit-lightbox', 'uikit-timepicker', 'uikit-accordion']) ?>
+<?php $view->script('edit-listing', 'driven/listings:js/edit-listing.js', ['vue', 'editor', 'uikit-sortable', 'uikit-nestable', 'uikit-tooltip', 'uikit-lightbox', 'uikit-timepicker', 'uikit-accordion']) ?>
 
 
 <section id="edit-listing">
@@ -88,6 +88,12 @@
                 <?php //= __('Please select a valid time.') ?><!--</p>-->
                 <!--                </div>-->
 
+                <div class="selectListingGroup uk-width-small-1-1">
+                    <select class="uk-width-1-1 uk-text-center uk-text-capitalize" v-model="listing.group_type_id" v-validate:required>
+                        <option v-for="group in group_types" :key="group.id" :value="group.id" v-validate:required>{{ group.title }}</option>
+                    </select>
+                </div>
+
                 <div class="uk-form-row uk-flex uk-flex-column">
                     <span class="uk-form-label">{{ 'Visibility' | trans }}</span>
                     <label>
@@ -124,15 +130,15 @@
 
                 </div>
 
-                <div class="uk-form-row">
+                <div class="uk-form-row" v-cloak>
                     <section id="sortable-categories-container">
                         <div id="sortable-categories" class="uk-sortable uk-accordion"
-                             data-uk-sortable="{handleClass:'uk-sortable-handle'}" data-uk-accordion="{collapse: false}">
-
+                            :class="{'uk-sortable-empty': !getLength(categories)}"
+                             data-uk-sortable="{ group:'category', maxDepth: 1, handleClass:'uk-sortable-handle' }" data-uk-accordion="{collapse: false}">
 
                             <div v-for="category in listing.categories | orderBy 'position'"
                                  data-id="{{category.id}}" data-index="{{$index}}"
-                                 class="sortable-category uk-panel uk-margin-bottom">
+                                 class="uk-sortable-item sortable-category uk-panel uk-margin-bottom">
 
                                 <div class="uk-flex uk-flex-middle uk-flex-space-between uk-visible-hover uk-accordion-title uk-margin-remove">
                                     <div class="uk-flex uk-flex-middle">
@@ -166,7 +172,7 @@
                                         data-uk-nestable="{ group:'item', maxDepth:1, handleClass:'uk-nestable-handle' }">
 
                                         <li v-for="item in getItems(category) | orderBy 'position'"
-                                            class="uk-nestable-item uk-margin sortable-item"
+                                            class="uk-nestable-item uk-margin sortable-item" id="{{ item.actions }}"
                                             data-categoryid="{{item.category_id}}" data-id="{{item.id}}"
                                             data-index="{{$index}}">
                                             <div class="uk-flex uk-flex-middle uk-flex-space-between uk-visible-hover">
@@ -178,14 +184,14 @@
                                                     <div class="uk-flex uk-flex-column">
                                                         <div class="uk-flex uk-flex-middle uk-flex-wrap">
 
-                                                            <a v-if="!item.price" class="uk-margin-small-right"
+                                                            <a v-if="item.actions.includes('itemHeadline')" class="uk-margin-small-right"
                                                                @click.stop.prevent="openHeadlineModal(category.id, item)">
                                                                 <strong class="uk-text-primary uk-margin-small-right">
                                                                     {{ item.title }} </strong>
 
                                                             </a>
 
-                                                            <a v-if="item.price" class="uk-margin-small-right"
+                                                            <a v-else class="uk-margin-small-right"
                                                                @click.stop.prevent="openItemModal(category.id, item)">
 
                                                                 <strong class="uk-text-primary uk-margin-small-right">
@@ -208,7 +214,11 @@
                                                        :class="item.status ? 'pk-icon-circle-success': 'pk-icon-circle-danger'"
                                                        data-uk-tooltip
                                                        @click.stop.prevent="toggle(item,'item')"></a>
-                                                    <a href=""
+                                                    <a v-if="item.actions.includes('itemHeadline')" href=""
+                                                       class="uk-icon-hover uk-icon-pencil uk-margin-right"
+                                                       data-uk-tooltip title="{{ 'Edit Item' | trans}}"
+                                                       @click.stop.prevent="openHeadlineModal(category.id, item)"></a>
+                                                    <a v-else href=""
                                                        class="uk-icon-hover uk-icon-pencil uk-margin-right"
                                                        data-uk-tooltip title="{{ 'Edit Item' | trans}}"
                                                        @click.stop.prevent="openItemModal(category.id, item)"></a>

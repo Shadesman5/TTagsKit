@@ -20,6 +20,9 @@ class Listing
     public $id;
 
     /** @Column(type="integer") */
+    public $group_type_id;
+
+    /** @Column(type="integer") */
     public $created_by;
 
     /** @Column(type="integer") */
@@ -69,6 +72,11 @@ class Listing
      * @BelongsTo(targetEntity="Driven\Listings\Model\Template", keyFrom="template_id")
      */
     public $template;
+
+    /**
+     * @BelongsTo(targetEntity="Driven\Listings\Model\GroupType", keyFrom="group_type_id", keyTo="id")
+     */
+    public $group_type;
 
     /**
      * @HasMany(targetEntity="Driven\Listings\Model\ListingCategory", keyFrom="id", keyTo="listing_id")
