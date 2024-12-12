@@ -45,21 +45,21 @@ return [
     /**
      * Node defaults
      */
-    'node' => [
+    // 'node' => [
 
-        'title_hide' => false,
-        'title_large' => false,
-        'alignment' => '',
-        'html_class' => '',
-        'sidebar_first' => false,
-        'hero_image' => '',
-        'hero_viewport' => '',
-        'hero_contrast' => '',
-        'hero_parallax' => '',
-        'content_top_padding' => true,
-        'content_bottom_padding' => true
+    //     'title_hide' => false,
+    //     'title_large' => false,
+    //     'alignment' => '',
+    //     'html_class' => '',
+    //     'sidebar_first' => false,
+    //     'hero_image' => '',
+    //     'hero_viewport' => '',
+    //     'hero_contrast' => '',
+    //     'hero_parallax' => '',
+    //     'content_top_padding' => true,
+    //     'content_bottom_padding' => true
 
-    ],
+    // ],
 
     /**
      * Widget defaults
