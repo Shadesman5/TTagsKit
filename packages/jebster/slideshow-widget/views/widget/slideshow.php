@@ -24,13 +24,13 @@ $view->script('superslides', 'slideshow-widget:app/js/jquery.superslides.js', 'e
                     if($image == null) continue;
 
                     $color = key_exists('color', $image) ? $image['color'] : '#FFF';
-                    $elementColor = 'style="color: '.$color.'; border-color: '.$color.';"';
+                    $elementColor = 'style="color: '.$color.';"';
                     ?>
-                    <li>
-                        <img src="<?= $image['src'] ?>" alt="<?= $image['alt'] ?>">
+                    <li class="uk-overlay">
+                        <img title="<?= $image['alt'] ?>" src="<?= $image['src'] ?>" alt="<?= $image['alt'] ?>">
 
                         <?php if(key_exists('header', $image) || key_exists('text', $image)): ?>
-                            <div class="text-overlay">
+                            <div class="uk-overlay-panel uk-overlay-background uk-overlay-bottom">
                                 <?php if(key_exists('header', $image) && strlen($image['header']) > 0): ?>
                                     <span class="uk-h1 header" <?= $elementColor ?>>
                                         <?= $image['header'] ?>
