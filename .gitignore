@@ -3,6 +3,9 @@
 /config.php
 /TTagsKit*.zip
 /TTagsKit.db
+/pagekit.db
 node_modules
 .DS_Store
 .idea
+/package-lock.json
+/pro-deployer.json
