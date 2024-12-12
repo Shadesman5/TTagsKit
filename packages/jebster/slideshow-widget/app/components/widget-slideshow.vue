@@ -32,7 +32,7 @@
                 <div class="uk-form-row">
                     <label class="uk-form-label">{{ 'Text' | trans}}</label>
                     <div class="uk-form-controls">
-                        <v-editor :value.sync="image.text" :options="{markdown : post.data.markdown, height: 250}"></v-editor>
+                        <v-editor :value.sync="image.text" :options="{height: 250}"></v-editor>
                     </div>
                 </div>
                 <div class="uk-form-row">
